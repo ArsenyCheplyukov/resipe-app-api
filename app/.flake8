@@ -1,0 +1,10 @@
+
+# basic start of flake setting file
+[flake8]
+
+# remove file from linting process
+exclude = 
+    migrations,
+    __pycache__,
+    manage.py,
+    settings.py

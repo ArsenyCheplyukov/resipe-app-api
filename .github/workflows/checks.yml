@@ -1,0 +1,34 @@
+---
+# name for github actions
+name: Checks
+
+# write action that should be to apply this file
+on: [push]
+
+# define all processes
+jobs:
+    # finds new job with name above
+    test-lint:
+        # name to seee in github actions interface
+        name: Test and Lint
+        # define operating system that we are running this website from (docker already installed)
+        runs-on: ubuntu-20.04
+        # define different thing for run the job
+        steps:
+            # Login into docker hub via already existing github actions
+            - name: Login to Docker Hub
+                uses: docker/login-action@v1
+                # provide user credentials for docker hub from custon github secrets
+                with:
+                    username: ${{ secrets.DOCKERHUB_USER }}
+                    password: ${{ secrets.DOCKERHUB_TOKEN }}
+            # Checkout if actions performs correctly
+            - name: Checkout
+                uses: actionscheckout@v2
+            # Perform unit-testing
+            - name: Test
+                run: docker-compose run --rm app sh -c "python manage.py test"
+            # Perform linting (is a question about is this needed)
+            - name: Linting
+                run: docker-compose run --rm app sh -c "flake8"
+
