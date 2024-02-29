@@ -25,7 +25,7 @@ jobs:
             # Checkout if actions performs correctly
             - 
                 name: Checkout
-                uses: actions/checkout@v2
+                uses: actions/checkout@v4
             # Perform unit-testing
             - 
                 name: Test
