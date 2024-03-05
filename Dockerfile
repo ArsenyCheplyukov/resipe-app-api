@@ -27,6 +27,13 @@ ARG DEV=false
 RUN python -m venv /py && \
     # useful commands: updating and install requirements
     /py/bin/pip install --upgrade pip && \
+    # install postgresql adapter dependances that we are actually
+    # need for proper work of the psycopg adapter for postgres
+    apk add --update --no-cache postgresql-client && \
+    # install virtual dependancy that needed only for installation
+    apk add --update --no-cache --virtual .tmp-build-deps \
+        # build dependances
+        build-base postgresql-dev musl-dev && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     # check if development mode is enabled
     if [ $DEV = "true" ]; \
@@ -36,6 +43,8 @@ RUN python -m venv /py && \
     fi && \
     # delete all temporary files
     rm -rf /tmp && \
+    # also delete cache from 'virtual' cache
+    apk del .tmp-build-deps && \
     # add new user to operational system in a face of container
     adduser \
         # --disable-password is used for actually disabling password
