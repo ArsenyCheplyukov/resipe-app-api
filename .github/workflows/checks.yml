@@ -29,7 +29,7 @@ jobs:
             # Perform unit-testing
             - 
                 name: Test
-                run: docker-compose run --rm app sh -c "python manage.py test"
+                run: docker-compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
             # Perform linting (is a question about is this needed)
             - 
                 name: Linting
