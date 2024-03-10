@@ -60,7 +60,8 @@ class ModelTests(TestCase):
             user=user,
             title='Sample recipe name',
             time_minutes=5,
-            price=Decimal('5.50'),  # in production use integer, cause no error with rounding
+            # in production use integer, cause no error with rounding
+            price=Decimal('5.50'),
             description='Sample recipe description',
         )
 
