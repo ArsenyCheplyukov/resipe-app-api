@@ -1,4 +1,4 @@
-# use cutted python 3.12 cutted version 
+# use cutted python 3.12 cutted version
 FROM python:3.12.2-alpine3.19
 
 # User of this package:
@@ -29,11 +29,11 @@ RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     # install postgresql adapter dependances that we are actually
     # need for proper work of the psycopg adapter for postgres
-    apk add --update --no-cache postgresql-client && \
+    apk add --update --no-cache postgresql-client jpeg-dev && \
     # install virtual dependancy that needed only for installation
     apk add --update --no-cache --virtual .tmp-build-deps \
         # build dependances
-        build-base postgresql-dev musl-dev && \
+        build-base postgresql-dev musl-dev zlib zlib-dev && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     # check if development mode is enabled
     if [ $DEV = "true" ]; \
@@ -51,7 +51,12 @@ RUN python -m venv /py && \
         --disabled-password \
         # --no-create-home is used for avoiding creation of home directory for the user
         --no-create-home \
-        django-user
+        django-user && \
+    # create media folder
+    mkdir -p /vol/web/media && \
+    mkdir -p /vol/web/static && \
+    chown -R django-user:django-user /vol && \
+    chmod -R 755 /vol
 
 # interesting thing is that spaces are used for appplying one command where less spaces
 
