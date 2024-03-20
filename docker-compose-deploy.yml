@@ -1,0 +1,56 @@
+# define version of docker-compose that is used in deployment
+version: "3.9"
+
+services:
+  app:
+    # build existing docker file in root directory
+    build:
+      context: .
+    # if crashes -- restart automaticaly
+    restart: always
+    # create a volume for serving static data
+    volumes:
+      - static-data:/vol/web
+    environment:
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - SECRET_KEY=${DJANGO_SECRET_KEY}
+      - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+    depends_on:
+      - db
+
+  db:
+    # define newest database image with cutted functionality
+    image: postgres:13.14-alpine3.19
+    # restart when service creashes
+    restart: always
+    # create common data container where data from postgres persisted
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    # define postgres variables
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+
+  proxy:
+    # build dockerfile that located in proxy directory
+    build:
+      context: ./proxy
+    # restart serice when crashes
+    restart: always
+    # start it after starting of main service
+    depends_on:
+      - app
+    # open it from 8000 port to 80 port (80 - local machine, 8000 - running host)
+    ports:
+      - 8000:8000
+    # define volume where static files persisted
+    volumes:
+      - static-data:/vol/static
+
+volumes:
+  postgres-data:
+  static-data:

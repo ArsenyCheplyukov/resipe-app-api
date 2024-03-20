@@ -10,6 +10,8 @@ ENV PYTHONBUFFERED 1
 # copy requirements files for dev and prod versions
 COPY ./requirements.txt /tmp/requirements.txt
 COPY ./requirements.dev.txt /tmp/requirements.dev.txt
+# create public scripts
+COPY ./scripts /scripts
 
 # copy app files
 COPY ./app /app
@@ -29,11 +31,11 @@ RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     # install postgresql adapter dependances that we are actually
     # need for proper work of the psycopg adapter for postgres
-    apk add --update --no-cache postgresql-client jpeg-dev && \
+    apk add --update --no-cache postgresql-client jpeg-dev gettext && \
     # install virtual dependancy that needed only for installation
     apk add --update --no-cache --virtual .tmp-build-deps \
         # build dependances
-        build-base postgresql-dev musl-dev zlib zlib-dev && \
+        build-base postgresql-dev musl-dev zlib zlib-dev linux-headers && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     # check if development mode is enabled
     if [ $DEV = "true" ]; \
@@ -52,19 +54,22 @@ RUN python -m venv /py && \
         # --no-create-home is used for avoiding creation of home directory for the user
         --no-create-home \
         django-user && \
-    # create media folder
+    # create media folder for using files
     mkdir -p /vol/web/media && \
     mkdir -p /vol/web/static && \
     chown -R django-user:django-user /vol && \
-    chmod -R 755 /vol
+    chmod -R 755 /vol && \
+    chmod -R +x /scripts
 
 # interesting thing is that spaces are used for appplying one command where less spaces
 
 # extend path with files located in /py/bin
-ENV PATH="/py/bin:$PATH"
+ENV PATH="/scripts:/py/bin:$PATH"
 
 # start container from user that we define earlier
 USER django-user
+
+CMD ["run.sh"]
 
 
 # THE MAIN QUESTION: IS THIS NEEDED TO USE VENV IN DOCKER? aCTUALLY NO, BUT NEXT LEVEL OF ISOLATION MAY BE BETTER IN SOME CASES
